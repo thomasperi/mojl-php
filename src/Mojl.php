@@ -1,8 +1,8 @@
 <?php
 
 // to-do:
-// composer
-// tests
+// write tests
+// publish composer package
 
 namespace ThomasPeri\Mojl;
 
