@@ -4,7 +4,7 @@ use ThomasPeri\Mojl\Mojl as Mojl;
 use PHPUnit\Framework\TestCase as TestCase;
 
 /**
- * Test the Aliaser class.
+ * Tests for the Mojl class.
  */
 final class MojlTest extends TestCase {
 
