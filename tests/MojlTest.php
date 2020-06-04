@@ -256,8 +256,9 @@ final class MojlTest extends TestCase {
 	}
 
 	function test_debug() {
-		$mojl = $this->get_mojl(__FUNCTION__);
-		$mojl->config(['debug' => true]);
+		$mojl = $this->get_mojl(__FUNCTION__, [
+			'debug' => true
+		]);
 
 		ob_start();
 		$mojl->include('foo');
@@ -273,8 +274,9 @@ final class MojlTest extends TestCase {
 	}
 
 	function test_suppress_debug_default() {
-		$mojl = $this->get_mojl(__FUNCTION__);
-		$mojl->config(['debug' => true]);
+		$mojl = $this->get_mojl(__FUNCTION__, [
+			'debug' => true
+		]);
 
 		ob_start();
 		$mojl->include('html');
@@ -290,8 +292,7 @@ final class MojlTest extends TestCase {
 	}
 
 	function test_suppress_debug_custom() {
-		$mojl = $this->get_mojl(__FUNCTION__);
-		$mojl->config([
+		$mojl = $this->get_mojl(__FUNCTION__, [
 			'debug' => true,
 			'suppress_debug' => ['foo'],
 		]);
@@ -310,8 +311,7 @@ final class MojlTest extends TestCase {
 	}
 
 	function test_suppress_debug_custom_multiple() {
-		$mojl = $this->get_mojl(__FUNCTION__);
-		$mojl->config([
+		$mojl = $this->get_mojl(__FUNCTION__, [
 			'debug' => true,
 			'suppress_debug' => ['foo', 'html'],
 		]);
@@ -322,6 +322,28 @@ final class MojlTest extends TestCase {
 
 		// neither is commented.
 		$expected = '<html>FOOBAR</html>';
+
+		$this->assertEquals($expected, $actual);
+	}
+
+	function test_static() {
+		$doc_root = __DIR__ . '/sandbox/' . __FUNCTION__;
+		Mojl::config([
+			'doc_root' => $doc_root,
+			'modules_dir' => $doc_root . '/modules',
+			'debug' => true,
+			'suppress_debug' => ['foo'],
+		]);
+	
+		ob_start();
+		Mojl::include('html');
+		$actual = ob_get_clean();
+
+		// html is commented, foo is not
+		$expected = "\n" .
+			"<!-- begin html { -->\n" .
+			"<html>(ZOTE)</html>\n" .
+			"<!-- end html } -->\n";
 
 		$this->assertEquals($expected, $actual);
 	}

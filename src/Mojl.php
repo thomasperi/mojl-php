@@ -1,14 +1,9 @@
 <?php
-
-// to-do:
-// write tests
-// publish composer package
-
 namespace ThomasPeri\Mojl;
 
 /*!
- * Mojl v0.0.1
- * A PHP library for serving content modules built with Nodejs mojl.
+ * Mojl v1.0.0
+ * A PHP library for including content modules built with the npm mojl library.
  * (c) Thomas Peri <hello@thomasperi.net>
  * MIT License
  */
@@ -118,13 +113,17 @@ class Mojl {
 
 	// Get an instance from within a static method.
 	private static function destatic() {
-		// Create the singleton if it doesn't exist and the call is static.
-		if (!self::$singleton && !isset($this)) {
+		// If the call isn't static, return the instance.
+		if (isset($this)) {
+			return $this;
+		}
+		
+		// If the call is static, return the singleton,
+		// creating it if it doesn't exist.
+		if (!self::$singleton) {
 			self::$singleton = new self();
 		}
-	
-		// De-static
-		return isset($this) ? $this : self::$singleton;
+		return self::$singleton;
 	}
 	
 	// Get the path of the php file for the named module, if it exists,
