@@ -1,0 +1,2 @@
+Each of the test_* subdirectories in this sandbox directory
+acts as a virtual document root for the test of the same name.

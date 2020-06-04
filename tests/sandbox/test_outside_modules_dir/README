@@ -1,0 +1,13 @@
+In this test, the test_* folder does not act as the document root,
+because the test needs to ensure that any attempt to load a module outside
+the modules directory fails.
+
+A module name of '../foo' produces a module path of
+
+	htdocs/modules/../foo/../foo.php
+
+which resolves to
+	
+	htdocs/foo.php
+
+which should not be able to load, even though it exists.
