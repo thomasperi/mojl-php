@@ -20,6 +20,16 @@ final class MojlTest extends TestCase {
 		$mojl->config($options);
 		return $mojl;
 	}
+
+	function test_mojl_exists_in_module() {
+		$mojl = $this->get_mojl(__FUNCTION__);
+
+		ob_start();
+		$mojl->include('foo');
+		$actual = ob_get_clean();
+		$expected = 'success';
+		$this->assertEquals($expected, $actual);
+	}
 	
 	function test_single_module() {
 		$mojl = $this->get_mojl(__FUNCTION__);
@@ -227,16 +237,6 @@ final class MojlTest extends TestCase {
 		$this->assertEquals($expected, $actual);
 	}
 
-	function test_mojl_exists() {
-		$mojl = $this->get_mojl(__FUNCTION__);
-
-		ob_start();
-		$mojl->include('foo');
-		$actual = ob_get_clean();
-		$expected = 'success';
-		$this->assertEquals($expected, $actual);
-	}
-
 	function test_outside_modules_dir() {
 		$mojl = $this->get_mojl(__FUNCTION__ . '/htdocs');
 		
@@ -252,6 +252,77 @@ final class MojlTest extends TestCase {
 		}
 		ob_end_clean();
 		
+		$this->assertEquals($expected, $actual);
+	}
+
+	function test_debug() {
+		$mojl = $this->get_mojl(__FUNCTION__);
+		$mojl->config(['debug' => true]);
+
+		ob_start();
+		$mojl->include('foo');
+		$actual = ob_get_clean();
+		
+		// foo is commented
+		$expected = "\n" .
+			"<!-- begin foo { -->\n" .
+			"FOOBAR\n" .
+			"<!-- end foo } -->\n";
+
+		$this->assertEquals($expected, $actual);
+	}
+
+	function test_suppress_debug_default() {
+		$mojl = $this->get_mojl(__FUNCTION__);
+		$mojl->config(['debug' => true]);
+
+		ob_start();
+		$mojl->include('html');
+		$actual = ob_get_clean();
+		
+		// foo is commented inside uncommented html
+		$expected = "<html>\n" .
+			"<!-- begin foo { -->\n" .
+			"FOOBAR\n" .
+			"<!-- end foo } -->\n</html>";
+
+		$this->assertEquals($expected, $actual);
+	}
+
+	function test_suppress_debug_custom() {
+		$mojl = $this->get_mojl(__FUNCTION__);
+		$mojl->config([
+			'debug' => true,
+			'suppress_debug' => ['foo'],
+		]);
+
+		ob_start();
+		$mojl->include('html');
+		$actual = ob_get_clean();
+
+		// html is commented, foo is not
+		$expected = "\n" .
+			"<!-- begin html { -->\n" .
+			"<html>FOOBAR</html>\n" .
+			"<!-- end html } -->\n";
+
+		$this->assertEquals($expected, $actual);
+	}
+
+	function test_suppress_debug_custom_multiple() {
+		$mojl = $this->get_mojl(__FUNCTION__);
+		$mojl->config([
+			'debug' => true,
+			'suppress_debug' => ['foo', 'html'],
+		]);
+
+		ob_start();
+		$mojl->include('html');
+		$actual = ob_get_clean();
+
+		// neither is commented.
+		$expected = '<html>FOOBAR</html>';
+
 		$this->assertEquals($expected, $actual);
 	}
 }
