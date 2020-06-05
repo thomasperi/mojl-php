@@ -1,6 +1,6 @@
 {
     "name": "thomasperi/mojl",
-    "description": "A PHP library for serving content modules built with Nodejs mojl",
+    "description": "A PHP library for including content modules built with the npm mojl library.",
     "type": "library",
     "license": "MIT",
     "authors": [

@@ -1,2 +1,4 @@
 # mojl-php
-A PHP library for serving content modules built with Nodejs mojl.
+A PHP library for including content modules built with the npm mojl library.
+
+Documentation to come.

@@ -348,3 +348,7 @@ final class MojlTest extends TestCase {
 		$this->assertEquals($expected, $actual);
 	}
 }
+
+function test_mojl_outside_include($file) {
+	return include $file;
+}
