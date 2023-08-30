@@ -40,9 +40,21 @@ class Util {
 	
 		return $expanded;
 	}
+	
+	static function unixSlashes($path) {
+		return str_replace('\\', '/', $path);
+	}
 
-	static function pathResolve($path, $sep = DIRECTORY_SEPARATOR) { // resolveAbsolutePath
+	static function pathResolve($path) {
+		$sep = '/';
+		$path = self::unixSlashes($path);
 		$orig_nodes = explode($sep, $path);
+		
+		// Strip trailing slashes (empty nodes)
+		while (end($orig_nodes) === '') {
+			array_pop($orig_nodes);
+		}
+		
 		$normalized_nodes = [];
 		$last = count($orig_nodes) - 1;
 		foreach ($orig_nodes as $i => $node) {
@@ -55,31 +67,10 @@ class Util {
 		return implode($sep, $normalized_nodes);
 	}
 
-	static function pathRelative($from, $to, $sep = DIRECTORY_SEPARATOR) { // getRelativePathInside
-		$from = explode($sep, self::pathResolve($from, $sep));
-		$to = explode($sep, self::pathResolve($to, $sep));
-		
-		// To emulate node.js, we need to strip the trailing separator from $to and $from:
-		// $ node
-		// Welcome to Node.js v14.21.3.
-		// Type ".help" for more information.
-		// > const path = require('path');
-		// undefined
-		// > path.relative('/foo/bar/zote/', '/foo/bar/thed/');
-		// '../thed'
-		// > path.relative('/foo/bar/zote/', '/foo/bar/thed');
-		// '../thed'
-		// > path.relative('/foo/bar/zote', '/foo/bar/thed');
-		// '../thed'
-		// > path.relative('/foo/bar/zote', '/foo/bar/thed/');
-		// '../thed'
-		// > 
-		if (end($from) === '') {
-			array_pop($from);
-		}
-		if (end($to) === '') {
-			array_pop($to);
-		}
+	static function pathRelative($from, $to) {
+		$sep = '/';
+		$from = explode($sep, self::pathResolve($from));
+		$to = explode($sep, self::pathResolve($to));
 		
 		$min_len = min(count($from), count($to));
 		for ($i = 0; $i < $min_len; $i++) {
@@ -99,17 +90,18 @@ class Util {
 	}
 
 	static function expandModule($base, $stack, $module) {
-		$isRelative = '@^\.{1,2}(/|$)@';
+		$base = self::unixSlashes($base);
+		$module = self::unixSlashes($module);
 		$module = trim($module, '/');
+		$isRelative = '@^\.{1,2}(/|$)@';
 		if (preg_match($isRelative, $module) === 1) {
 			if (count($stack) === 0) {
 				throw new \Exception('Relative module paths can only be used from inside templates.');
 			}
-			$base = resolveAbsolutePath($base);
-			$moduleDir = $base . '/' . $stack[0]['module'];
+			$moduleDir = self::pathResolve($base . '/' . end($stack)['module']);
 			$moduleParent = dirname($moduleDir);
-			$absoluteModule = resolveAbsolutePath($moduleParent . '/' . $module);
-			$module = getRelativePathInside($base, $absoluteModule);
+			$absoluteModule = self::pathResolve($moduleParent . '/' . $module);
+			$module = self::pathRelative($base, $absoluteModule);
 		}
 		return $module;
 	}
