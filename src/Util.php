@@ -107,10 +107,11 @@ class Util {
 	}
 
 	static function getTemplate($base, $module) {
+		$ext = '.tpl.php';
 		$modulePath = $base . '/' . $module;
-		$templatePath = $modulePath . '/' . basename($module) . '.tpl.php';
+		$templatePath = $modulePath . '/' . basename($module) . $ext;
 		if (!file_exists($templatePath)) {
-			$templatePath = $modulePath + '.tpl.js';
+			$templatePath = $modulePath . $ext;
 			if (!file_exists($templatePath)) {
 				return false;
 			}

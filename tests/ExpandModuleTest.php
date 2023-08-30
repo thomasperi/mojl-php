@@ -47,4 +47,18 @@ final class ExpandModuleTest extends TestCase {
 		$this->assertEquals($expected, $actual);
 	}
 
+	function test_expandModule_absolute_slash() {
+		$stack = [
+			['module' => 'src/zote'],
+			['module' => 'src/sbor/thed'],
+		];
+		$actual = Util::expandModule(
+			'/foo/bar',
+			$stack,
+			'/src/sneg',
+		);
+		$expected = 'src/sneg';
+		$this->assertEquals($expected, $actual);
+	}
+
 }
