@@ -22,6 +22,7 @@ final class ExpandOptionsTest extends TestCase {
 		$expected = [
 			'base' => '/foo/bar',
 			'maxIncludeDepth' => 100,
+			'pageRelativeUrls' => false,
 			'isDev' => false,
 		];
 		$this->assertEquals($expected, $actual);
@@ -35,6 +36,7 @@ final class ExpandOptionsTest extends TestCase {
 		$expected = [
 			'base' => '/foo/bar',
 			'maxIncludeDepth' => 5,
+			'pageRelativeUrls' => false,
 			'isDev' => false,
 		];
 		$this->assertEquals($expected, $actual);
@@ -48,6 +50,7 @@ final class ExpandOptionsTest extends TestCase {
 		$expected = [
 			'base' => '/foo/bar',
 			'maxIncludeDepth' => 100,
+			'pageRelativeUrls' => false,
 			'isDev' => true,
 		];
 		$this->assertEquals($expected, $actual);
@@ -61,6 +64,7 @@ final class ExpandOptionsTest extends TestCase {
 		$expected = [
 			'base' => '/foo/bar',
 			'maxIncludeDepth' => 100,
+			'pageRelativeUrls' => false,
 			'isDev' => false,
 		];
 		$this->assertEquals($expected, $actual);
