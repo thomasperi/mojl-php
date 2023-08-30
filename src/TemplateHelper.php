@@ -1,6 +1,5 @@
 <?php
-namespace Mojl;
-require_once __DIR__ . '/expandOptions.php';
+namespace ThomasPeri\Mojl;
 
 class TemplateHelper {
 	private $settings;
@@ -56,62 +55,4 @@ class TemplateHelper {
 		// to-do
 		echo '<!-- styles -->';
 	}
-}
-
-function expandModule($base, $stack, $module) {
-	$isRelative = '@^\.{1,2}(/|$)@';
-	$module = trim($module, '/');
-	if (preg_match($isRelative, $module) === 1) {
-		if (count($stack) === 0) {
-			throw new \Exception('Relative module paths can only be used from inside templates.');
-		}
-		$base = resolveAbsolutePath($base);
-		$moduleDir = $base . '/' . $stack[0]['module'];
-		$moduleParent = dirname($moduleDir);
-		$absoluteModule = resolveAbsolutePath($moduleParent . '/' . $module);
-		$module = getRelativePathInside($base, $absoluteModule);
-	}
-	return $module;
-}
-
-function getTemplate($base, $module) {
-	$modulePath = $base . '/' . $module;
-	$templatePath = $modulePath . '/' . basename($module) . '.tpl.php';
-	if (!file_exists($templatePath)) {
-		$templatePath = $modulePath + '.tpl.js';
-		if (!file_exists($templatePath)) {
-			return false;
-		}
-	}
-	return $templatePath;
-}
-
-function includeTemplate($templatePath, $helper, $props) {
-	$fn = require($templatePath);
-	if (!is_callable($fn)) {
-		throw new \Exception("Template $templatePath does not return a function");
-	}
-	$fn($helper, $props);
-}
-
-function resolveAbsolutePath($path) {
-	$orig_nodes = explode('/', trim($path, '/'));
-	$resolved_nodes = [];
-	foreach ($orig_nodes as $node) {
-		if ($node === '..') {
-			array_pop($resolved_nodes);
-		}
-		if ($node !== '' && $node !== '.') {
-			array_push($resolved_nodes, $node);
-		}
-	}
-	return '/' . implode('/', $resolved_nodes);
-}
-
-function getRelativePathInside($from, $to) {
-	$len = strlen($from);
-	if ($from . '/' !== substr($to, 0, $len + 1)) {
-		throw new \Exception("$to is outside $from");
-	}
-	return substr($to, $len);
 }
