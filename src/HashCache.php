@@ -82,7 +82,7 @@ class HashCache {
 		$hash = $this->createHash($absFile);
 		if ($hash) {
 			$ctime = filectime($absFile);
-			$entry = new StdClass();
+			$entry = new \StdClass();
 			$entry->ctime = $ctime;
 			$entry->hash = $hash;
 			$entry->relFile = $relFile;
