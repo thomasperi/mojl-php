@@ -31,7 +31,7 @@ final class HashCacheTest extends TestCase {
 		$this->assertEquals($entry, null);
 	}
 
-	function test_HashCache_freshEntryAfterCreate() {
+	function test_HashCache_freshEntryAfterCreated() {
 		$settings = Options::expand([
 			'base' => __DIR__ . '/HashCacheTest'
 		]);
@@ -49,6 +49,28 @@ final class HashCacheTest extends TestCase {
 		$this->assertTrue($cache->entryIsFresh($entryRead));
 	}
 
+	function test_HashCache_noFreshEntryAfterModified() {
+		_Clone::run(__FILE__, function ($base) {
+			$settings = Options::expand([
+				'base' => $base,
+			]);
+			$cache = new HashCache($settings);
+			$relFile = 'src/foo/foo.txt';
+			
+			$cache->createEntry($relFile);
+		
+			$entry = $cache->readExistingEntry($relFile);
+			$this->assertTrue($cache->entryIsFresh($entry));
+			
+			sleep(1);
+			
+			$absFile = $base . '/'. $relFile;
+			file_put_contents($absFile, 'bar');
+
+			$entry = $cache->readExistingEntry($relFile);
+			$this->assertFalse($cache->entryIsFresh($entry));
+		});
+	}
 
 	// to-do: complete tests
 

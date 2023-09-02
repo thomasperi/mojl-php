@@ -26,6 +26,11 @@ class HashCache {
 		$relFile = Util::pathRelative($this->base, $absFile);
 		return $this->stamp($relFile);
 	}
+	
+	function getMtime($absFile) {
+		clearstatcache(false, $absFile);
+		return filemtime($absFile);
+	}
 
 	function getCache() {
 		if (!$this->cache) {
@@ -59,7 +64,7 @@ class HashCache {
 			return false;
 		}
 		$absFile = $this->base . '/' . $entry->relFile;
-		return file_exists($absFile) && ($entry->ctime === filectime($absFile));
+		return file_exists($absFile) && ($entry->mtime === $this->getMtime($absFile));
 	}
 	
 	function createEntry($relFile) {
@@ -81,9 +86,9 @@ class HashCache {
 		$absFile = $this->base . '/' . $relFile;
 		$hash = $this->createHash($absFile);
 		if ($hash) {
-			$ctime = filectime($absFile);
+			$mtime = $this->getMtime($absFile);
 			$entry = new \StdClass();
-			$entry->ctime = $ctime;
+			$entry->mtime = $mtime;
 			$entry->hash = $hash;
 			$entry->relFile = $relFile;
 			$this->getCache()->entries->$relFile = $entry;
