@@ -9,7 +9,7 @@ class HashCache {
 	private $jsonString = '';
 	
 	function __construct($settings = []) {
-		$this->$base = $settings['base'];
+		$this->base = $settings['base'];
 		if ($settings['cacheFile']) {
 			$this->cacheFile = $settings['base'] . '/' . $settings['cacheFile'];
 			$this->cacheTTL = $settings['cacheTTL'];
@@ -41,7 +41,9 @@ class HashCache {
 	}
 	
 	function readExistingEntry($relFile) {
-		return &$this->getCache()->entries->$relFile;
+		if (property_exists($this->getCache()->entries, $relFile)) {
+			return $this->getCache()->entries->$relFile;
+		}
 	}
 	
 	function getFreshEntry($relFile) {
@@ -70,7 +72,7 @@ class HashCache {
 			foreach ($entries as $relFileProp => $entry) {
 				$absFile = $this->base . '/' . $relFileProp;
 				if (!file_exists($absFile)) {
-					unset $entries->$relFileProp;
+					unset($entries->$relFileProp);
 				}
 			}
 		}
@@ -122,5 +124,3 @@ class HashCache {
 	}
 	
 }
-
-module.exports = HashCache;
