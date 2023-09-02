@@ -1,7 +1,19 @@
 <?php
 namespace ThomasPeri\Mojl\Test;
 
-class _Clone {
+class _CloneBox {
+	private $base = '';
+	
+	function __construct($base) {
+		$this->base = $base;
+	}
+	
+	function snapshot() {
+		$result = [];
+		self::files($this->base, '', $result);
+		return $result;
+	}
+	
 	static function run($filename, $fn) {
 		$source = preg_replace('#\\.php$#', '', $filename);
 
@@ -11,8 +23,10 @@ class _Clone {
 		mkdir($tempUniq);
 		self::clone($source, $tempBase);
 
+		$instance = new self($tempBase);
+
 		try {
-			$fn($tempBase);
+			$fn($tempBase, $instance);
 		} finally {
 			self::destroy($tempUniq);
 		}
@@ -34,6 +48,24 @@ class _Clone {
 		}
 	}
 	
+	static function files($temp, $dir, &$result) {
+		if ($dir) {
+			$dir .= '/';
+		}
+		foreach (scandir($temp) as $item) {
+			if ($item === '.' || $item === '..') {
+				continue;
+			}
+			$relItem = $dir . $item;
+			$absItem = $temp . '/' . $item;
+			if (is_dir($absItem)) {
+				self::files($absItem, $relItem, $result);
+			} else if (is_file($absItem)) {
+				$result[$relItem] = file_get_contents($absItem);
+			}
+		}
+	}
+	
 	static function destroy($temp) {
 		foreach (scandir($temp) as $item) {
 			if ($item === '.' || $item === '..') {
@@ -50,3 +82,4 @@ class _Clone {
 	}
 	
 }
+

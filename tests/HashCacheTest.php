@@ -17,7 +17,7 @@ final class HashCacheTest extends TestCase {
 	}
 
 	function test_HashCache_noEntries() {
-		_Clone::run(__FILE__, function ($base) {
+		_CloneBox::run(__FILE__, function ($base) {
 			$settings = Options::expand([
 				'base' => $base,
 			]);
@@ -30,7 +30,7 @@ final class HashCacheTest extends TestCase {
 	}
 
 	function test_HashCache_noEntryBeforeCreated() {
-		_Clone::run(__FILE__, function ($base) {
+		_CloneBox::run(__FILE__, function ($base) {
 			$settings = Options::expand([
 				'base' => $base,
 			]);
@@ -43,7 +43,7 @@ final class HashCacheTest extends TestCase {
 	}
 
 	function test_HashCache_freshEntryAfterCreated() {
-		_Clone::run(__FILE__, function ($base) {
+		_CloneBox::run(__FILE__, function ($base) {
 			$settings = Options::expand([
 				'base' => $base,
 			]);
@@ -63,7 +63,7 @@ final class HashCacheTest extends TestCase {
 	}
 
 	function test_HashCache_noFreshEntryAfterModified() {
-		_Clone::run(__FILE__, function ($base) {
+		_CloneBox::run(__FILE__, function ($base) {
 			$settings = Options::expand([
 				'base' => $base,
 			]);
@@ -82,6 +82,98 @@ final class HashCacheTest extends TestCase {
 			$this->assertFalse($cache->entryIsFresh($entry));
 		});
 	}
+
+	function test_HashCache_newFreshEntryIfNotFresh() {
+		_CloneBox::run(__FILE__, function ($base) {
+			$settings = Options::expand([
+				'base' => $base,
+			]);
+			$cache = new HashCache($settings);
+			$relFile = 'src/foo/foo.txt';
+			$absFile = self::retro($base, $relFile);
+
+			$createdEntry = $cache->createEntry($relFile);
+			
+			file_put_contents($absFile, 'bar');
+
+			$existingEntry = $cache->readExistingEntry($relFile);
+			$this->assertSame($createdEntry, $existingEntry);
+			
+			$freshEntry = $cache->getFreshEntry($relFile);
+			$this->assertNotEquals($existingEntry, $freshEntry);
+		});
+	}
+
+	function test_HashCache_sameFreshEntryIfFresh() {
+		_CloneBox::run(__FILE__, function ($base) {
+			$settings = Options::expand([
+				'base' => $base,
+			]);
+			$cache = new HashCache($settings);
+			$relFile = 'src/foo/foo.txt';
+			$absFile = self::retro($base, $relFile);
+
+			$createdEntry = $cache->createEntry($relFile);
+			$reCreatedEntry = $cache->createEntry($relFile);
+			$this->assertNotSame($createdEntry, $reCreatedEntry);
+
+			$existingEntry = $cache->readExistingEntry($relFile);
+			$freshEntry = $cache->getFreshEntry($relFile);
+			$this->assertSame($reCreatedEntry, $existingEntry);
+			$this->assertSame($existingEntry, $freshEntry);
+		});
+	}
+	
+	function test_HashCache_noCacheFileWithoutCacheSave() {
+		_CloneBox::run(__FILE__, function ($base, $box) {
+			$settings = Options::expand([
+				'base' => $base,
+			]);
+			$cache = new HashCache($settings);
+			$relFile = 'src/foo/foo.txt';
+			$absFile = self::retro($base, $relFile);
+
+			$cache->getFreshEntry($relFile);
+			$after = $box->snapshot();
+			$this->assertEquals($after, ['src/foo/foo.txt' => 'foo']);
+		});
+	}
+	
+	function test_HashCache_cacheFileWithCacheSave() {
+		_CloneBox::run(__FILE__, function ($base, $box) {
+			$settings = Options::expand([
+				'base' => $base,
+			]);
+			$cache = new HashCache($settings);
+			$relFile = 'src/foo/foo.txt';
+			$absFile = self::retro($base, $relFile);
+
+			$cache->getFreshEntry($relFile);
+			$cache->saveCache();
+			$after = $box->snapshot();
+			
+			$fileList = array_keys($after);
+			$this->assertEquals($fileList, [
+				'mojl-cache.json',
+				'src/foo/foo.txt',
+			]);
+			
+			$savedCache = json_decode($after['mojl-cache.json']);
+			$this->assertEquals(array_keys(get_object_vars($savedCache)), ['entries', 'expires']);
+			
+			$this->assertTrue($savedCache->expires > time());
+			
+			$savedEntries = $savedCache->entries;
+			$this->assertEquals(array_keys(get_object_vars($savedEntries)), ['src/foo/foo.txt']);
+			
+			$savedEntry = $savedEntries->$relFile;
+			$this->assertEquals(array_keys(get_object_vars($savedEntry)), ['mtime', 'hash', 'relFile']);
+			$this->assertEquals($savedEntry->relFile, 'src/foo/foo.txt');
+			$this->assertEquals($savedEntry->hash, self::$fooHash);
+		});
+	}
+	
+	
 
 	// to-do: complete tests
 
