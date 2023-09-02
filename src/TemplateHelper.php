@@ -9,7 +9,7 @@ class TemplateHelper {
 		if (substr($urlDocument, 0, 1) !== '/') {
 			throw new \Exception('TemplateHelper: `urlDocument` must begin with a slash');
 		}
-		$this->settings = expandOptions($settings);
+		$this->settings = Options::expand($settings);
 	}
 	
 	function exists($module) {

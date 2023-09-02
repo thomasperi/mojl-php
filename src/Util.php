@@ -2,43 +2,12 @@
 namespace ThomasPeri\Mojl;
 
 class Util {
-	static function expandOptions($options) {
-		$defaults = [
-			'base' => '',
-		// to-do:	'buildDevDir' => 'dev',
-		// to-do:	'buildDistDir' => 'dist',
-		// to-do:	'buildAssetsDir' => 'assets',
-			'maxIncludeDepth' => 100,
-			'pageRelativeUrls' => false,
-		// to-do:	'trimIncludes' => true,
-			'isDev' => false,
-		];
-	
-		$expanded = [];
-		if (!is_array($options)) {
-			$options = [];
-		}
-	
-		if (!array_key_exists('base', $options)) {
-			throw new \Exception('no base specified');
-		}
-	
-		// Populate missing options and ensure data types on top-level options are correct.
-		foreach ($defaults as $key => $default) {
-			$value = array_key_exists($key, $options) ? $options[$key] : $default;
-			$actualType = gettype($value);
-			$expectedType = gettype($default);
-
-			if ($expectedType !== $actualType) {
-				throw new \Exception(
-					"expected '$key' option to be $expectedType but got $actualType instead"
-				);
-			}
-		
-			$expanded[$key] = $value;
-		}
-	
-		return $expanded;
+	static function isAbsolutePath(string $path) {
+		$windows = '#^[a-zA-Z]:\\\\#';
+		return (
+			$path[0] === '/' || 
+			(preg_match($windows, $path) && preg_match($windows, __DIR__))
+		);
 	}
 	
 	static function unixSlashes($path) {
@@ -125,6 +94,11 @@ class Util {
 			throw new \Exception("Template $templatePath does not return a function");
 		}
 		$fn($helper, $props);
+	}
+	
+	static function writeFileRecursive($file, $data) {
+		mkdir(dirname($file), 0777, true);
+		file_put_contents($file, $data);
 	}
 
 }
