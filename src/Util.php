@@ -111,6 +111,13 @@ class Util {
 		if (preg_match('#^([a-z][a-z0-9.+-]*:)?\\/\\/#i', $filePath)) {
 			return $filePath;
 		}
+		
+		if (is_array($settings)) {
+			$settings = (object) $settings;
+		}
+		if (is_array($options)) {
+			$options = (object) $options;
+		}
 
 		$isAbsolute = $filePath[0] === '/';
 	
@@ -119,17 +126,17 @@ class Util {
 			$filePath :
 			self::pathResolve(dirname($currentTemplate) . '/' . $filePath);
 	
-		$absoluteUrl = '/' . $settings['buildAssetsDir'] .
-			'/' . self::pathRelative($settings['base'], $absolutePath);
+		$absoluteUrl = '/' . $settings->buildAssetsDir .
+			'/' . self::pathRelative($settings->base, $absolutePath);
 
-		$useHash = ( $options && array_key_exists('hash', $options) ) ?
-			$options['hash'] : true;
+		$useHash = ( $options && property_exists($options, 'hash') ) ?
+			$options->hash : true;
 		
 		if ($useHash) {
-			$absoluteUrl .= $settings['_cache']->stampAbs($absolutePath);
+			$absoluteUrl .= $settings->_cache->stampAbs($absolutePath);
 		}
 
-		return $settings['pageRelativeUrls'] ?
+		return $settings->pageRelativeUrls ?
 			self::pathRelative(dirname($currentDocument), $absoluteUrl) :
 			$absoluteUrl;
 	}
@@ -142,11 +149,15 @@ class Util {
 			return $url;
 		}
 	
+		if (is_array($settings)) {
+			$settings = (object) $settings;
+		}
+
 		$isRelative = $url[0] !== '/';
 		$currentDir = dirname($currentPage);
 		$tailSlash = ($url[strlen($url) - 1] === '/') ? '/' : '';
 	
-		if ($settings['pageRelativeUrls']) {
+		if ($settings->pageRelativeUrls) {
 			if ($isRelative) {
 				return $url;
 			} else {
@@ -159,6 +170,10 @@ class Util {
 				return $url;
 			}
 		}
+	}
+	
+	static function mergeObjects($o1, $o2) {
+		return (object) array_merge( (array) $o1, (array) $o2 );
 	}
 
 }

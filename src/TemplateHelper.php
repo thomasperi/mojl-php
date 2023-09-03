@@ -53,7 +53,11 @@ class TemplateHelper {
 	}
 	
 	function link($linkPath) {
-		// to-do
+		return Util::linkUrl(
+			$this->settings,
+			$this->urlDocument,
+			$linkPath
+		);
 	}
 	
 	function scripts($collationNames = [], $options = []) {

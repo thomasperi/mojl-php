@@ -9,11 +9,12 @@ class HashCache {
 	private $jsonString = '';
 	
 	function __construct($settings = []) {
-		$this->base = $settings['base'];
-		if ($settings['cacheFile']) {
-			$this->cacheFile = $settings['base'] . '/' . $settings['cacheFile'];
-			$this->cacheTTL = $settings['cacheTTL'];
+		if (is_array($settings)) {
+			$settings = (object)$settings;
 		}
+		$this->base = $settings->base;
+		$this->cacheTTL = $settings->cacheTTL;
+		$this->cacheFile = $settings->base . '/' . $settings->cacheFile;
 	}
 	
 	function stamp($relFile) {

@@ -1,13 +1,18 @@
 <?php
 namespace ThomasPeri\Mojl\Test;
 use ThomasPeri\Mojl\Util as Util;
-use ThomasPeri\Mojl\Options as Options;
 use ThomasPeri\Mojl\HashCache as HashCache;
 use PHPUnit\Framework\TestCase as TestCase;
 
 final class HashCacheTest extends TestCase {
 
 	static private $fooHash = 'C*7Hteo!D9vJXQ3UfzxbwnXaijM~';
+	
+	static private $defaults = [
+		'cacheFile' => 'mojl-cache.json',
+		'cacheSave' => false,
+		'cacheTTL' => 1 * 24 * 60 * 60 * 1000,
+	];
 	
 	static private function retro($base, $relFile) {
 		$absFile = $base. '/' . $relFile;
@@ -18,9 +23,7 @@ final class HashCacheTest extends TestCase {
 
 	function test_HashCache_noEntries() {
 		_CloneBox::run(__FILE__, function ($base) {
-			$settings = Options::expand([
-				'base' => $base,
-			]);
+			$settings = array_merge(self::$defaults, ['base' => $base]);
 			$cache = new HashCache($settings);
 			
 			$internalCache = $cache->getCache();
@@ -31,9 +34,7 @@ final class HashCacheTest extends TestCase {
 
 	function test_HashCache_noEntryBeforeCreated() {
 		_CloneBox::run(__FILE__, function ($base) {
-			$settings = Options::expand([
-				'base' => $base,
-			]);
+			$settings = array_merge(self::$defaults, ['base' => $base]);
 			$cache = new HashCache($settings);
 			$relFile = 'src/foo/foo.txt';
 			
@@ -44,9 +45,7 @@ final class HashCacheTest extends TestCase {
 
 	function test_HashCache_freshEntryAfterCreated() {
 		_CloneBox::run(__FILE__, function ($base) {
-			$settings = Options::expand([
-				'base' => $base,
-			]);
+			$settings = array_merge(self::$defaults, ['base' => $base]);
 			$cache = new HashCache($settings);
 			$relFile = 'src/foo/foo.txt';
 			
@@ -64,9 +63,7 @@ final class HashCacheTest extends TestCase {
 
 	function test_HashCache_noFreshEntryAfterModified() {
 		_CloneBox::run(__FILE__, function ($base) {
-			$settings = Options::expand([
-				'base' => $base,
-			]);
+			$settings = array_merge(self::$defaults, ['base' => $base]);
 			$cache = new HashCache($settings);
 			$relFile = 'src/foo/foo.txt';
 			$absFile = self::retro($base, $relFile);
@@ -85,9 +82,7 @@ final class HashCacheTest extends TestCase {
 
 	function test_HashCache_newFreshEntryIfNotFresh() {
 		_CloneBox::run(__FILE__, function ($base) {
-			$settings = Options::expand([
-				'base' => $base,
-			]);
+			$settings = array_merge(self::$defaults, ['base' => $base]);
 			$cache = new HashCache($settings);
 			$relFile = 'src/foo/foo.txt';
 			$absFile = self::retro($base, $relFile);
@@ -106,9 +101,7 @@ final class HashCacheTest extends TestCase {
 
 	function test_HashCache_sameFreshEntryIfFresh() {
 		_CloneBox::run(__FILE__, function ($base) {
-			$settings = Options::expand([
-				'base' => $base,
-			]);
+			$settings = array_merge(self::$defaults, ['base' => $base]);
 			$cache = new HashCache($settings);
 			$relFile = 'src/foo/foo.txt';
 			$absFile = self::retro($base, $relFile);
@@ -126,9 +119,7 @@ final class HashCacheTest extends TestCase {
 	
 	function test_HashCache_noCacheFileWithoutCacheSave() {
 		_CloneBox::run(__FILE__, function ($base, $box) {
-			$settings = Options::expand([
-				'base' => $base,
-			]);
+			$settings = array_merge(self::$defaults, ['base' => $base]);
 			$cache = new HashCache($settings);
 			$relFile = 'src/foo/foo.txt';
 			$absFile = self::retro($base, $relFile);
@@ -141,9 +132,7 @@ final class HashCacheTest extends TestCase {
 	
 	function test_HashCache_cacheFileWithCacheSave() {
 		_CloneBox::run(__FILE__, function ($base, $box) {
-			$settings = Options::expand([
-				'base' => $base,
-			]);
+			$settings = array_merge(self::$defaults, ['base' => $base]);
 			$cache = new HashCache($settings);
 			$relFile = 'src/foo/foo.txt';
 			$absFile = self::retro($base, $relFile);
@@ -175,10 +164,7 @@ final class HashCacheTest extends TestCase {
 	
 	function test_HashCache_customCacheFileName() {
 		_CloneBox::run(__FILE__, function ($base, $box) {
-			$settings = Options::expand([
-				'base' => $base,
-				'cacheFile' => 'zote-cache.json',
-			]);
+			$settings = array_merge(self::$defaults, ['base' => $base, 'cacheFile' => 'zote-cache.json']);
 			$cache = new HashCache($settings);
 			$relFile = 'src/foo/foo.txt';
 			$absFile = self::retro($base, $relFile);
@@ -197,9 +183,7 @@ final class HashCacheTest extends TestCase {
 
 	function test_HashCache_noEntriesForNonexistentFiles() {
 		_CloneBox::run(__FILE__, function ($base, $box) {
-			$settings = Options::expand([
-				'base' => $base,
-			]);
+			$settings = array_merge(self::$defaults, ['base' => $base]);
 			$cache = new HashCache($settings);
 			$relFileFoo = 'src/foo/foo.txt';
 			$relFileBar = 'src/foo/bar.txt'; // not there
@@ -221,14 +205,12 @@ final class HashCacheTest extends TestCase {
 	
 	function test_HashCache_readExistingEntries() {
 		_CloneBox::run(__FILE__, function ($base, $box) {
-			$settings = Options::expand([
-				'base' => $base,
-			]);
+			$settings = array_merge(self::$defaults, ['base' => $base]);
 			$relFile = 'src/foo/foo.txt';
 			$absFile = self::retro($base, $relFile);
 
 			// Create cache entry
-			$cache_1 = new HashCache(array_merge($settings, ['cacheSave' => true]));
+			$cache_1 = new HashCache(array_merge((array)$settings, ['cacheSave' => true]));
 			$cache_1->createEntry($relFile);
 			$cache_1->saveCache(); 
 			
