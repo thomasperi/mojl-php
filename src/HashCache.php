@@ -18,7 +18,7 @@ class HashCache {
 	
 	function stamp($relFile) {
 		$entry = $this->getFreshEntry($relFile);
-		$stamp = $entry ? $entry['hash'] : 'not-found';
+		$stamp = $entry ? $entry->hash : 'not-found';
 		return "?h=$stamp";
 	}
 	
@@ -108,8 +108,7 @@ class HashCache {
 	
 	function createHash($absFile) {
 		if (file_exists($absFile)) {
-			$content = file_get_contents($absFile);
-			$hash = base64_encode(sha1($content, true));
+			$hash = base64_encode(sha1_file($absFile, true));
 
 			// The hash is in base64, so replace the base64 characters
 			// that are reserved for URIs with characters that aren't.
