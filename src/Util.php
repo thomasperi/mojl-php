@@ -134,4 +134,31 @@ class Util {
 			$absoluteUrl;
 	}
 
+	static function linkUrl($settings, $currentPage, $url) {
+		// RFC 2396
+		// scheme        = alpha *( alpha | digit | "+" | "-" | "." )
+		// net_path      = "//" authority [ abs_path ]
+		if (preg_match('#^([a-z][a-z0-9.+-]*:)?\\/\\/#i', $url)) {
+			return $url;
+		}
+	
+		$isRelative = $url[0] !== '/';
+		$currentDir = dirname($currentPage);
+		$tailSlash = ($url[strlen($url) - 1] === '/') ? '/' : '';
+	
+		if ($settings['pageRelativeUrls']) {
+			if ($isRelative) {
+				return $url;
+			} else {
+				return self::pathRelative($currentDir, $url) . $tailSlash;
+			}
+		} else {
+			if ($isRelative) {
+				return self::pathResolve($currentDir . '/' . $url) . $tailSlash;
+			} else {
+				return $url;
+			}
+		}
+	}
+
 }

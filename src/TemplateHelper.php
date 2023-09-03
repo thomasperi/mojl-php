@@ -1,14 +1,18 @@
 <?php
 namespace ThomasPeri\Mojl;
 
+// to-do: port tests for TemplateHelper specifically 
+
 class TemplateHelper {
 	private $settings;
+	private $urlDocument;
 	private $stack = [];
 	
 	function __construct($settings = [], $urlDocument = '/index.html') {
 		if (substr($urlDocument, 0, 1) !== '/') {
 			throw new \Exception('TemplateHelper: `urlDocument` must begin with a slash');
 		}
+		$this->urlDocument = $urlDocument;
 		$this->settings = Options::expand($settings);
 	}
 	
@@ -39,7 +43,13 @@ class TemplateHelper {
 	}
 	
 	function file($filePath, $options = []) {
-		// to-do
+		return Util::fileUrl(
+			$this->settings,
+			end($stack)->templatePath,
+			$this->urlDocument,
+			$filePath,
+			$options
+		);
 	}
 	
 	function link($linkPath) {
