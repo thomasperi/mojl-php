@@ -8,7 +8,7 @@ class Options {
 		
 		// to-do:	'buildDevDir' => 'dev',
 		// to-do:	'buildDistDir' => 'dist',
-		// to-do:	'buildAssetsDir' => 'assets',
+		'buildAssetsDir' => 'assets',
 
 		'cacheFile' => 'mojl-cache.json',
 		'cacheSave' => false,
@@ -40,6 +40,8 @@ class Options {
 			);
 		}
 		
+		$expanded['_cache'] = new HashCache($expanded);
+
 		return $expanded;
 	}
 	

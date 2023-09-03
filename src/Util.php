@@ -103,5 +103,35 @@ class Util {
 		}
 		file_put_contents($file, $data);
 	}
+	
+	static function fileUrl($settings, $currentTemplate, $currentDocument, $filePath, $options) {
+		// RFC 2396
+		// scheme        = alpha *( alpha | digit | "+" | "-" | "." )
+		// net_path      = "//" authority [ abs_path ]
+		if (preg_match('#^([a-z][a-z0-9.+-]*:)?\\/\\/#i', $filePath)) {
+			return $filePath;
+		}
+
+		$isAbsolute = $filePath[0] === '/';
+	
+		// A relative path gets absolutized relative to the current included template file.
+		$absolutePath = $isAbsolute ?
+			$filePath :
+			self::pathResolve(dirname($currentTemplate) . '/' . $filePath);
+	
+		$absoluteUrl = '/' . $settings['buildAssetsDir'] .
+			'/' . self::pathRelative($settings['base'], $absolutePath);
+
+		$useHash = ( $options && array_key_exists('hash', $options) ) ?
+			$options['hash'] : true;
+		
+		if ($useHash) {
+			$absoluteUrl .= $settings['_cache']->stampAbs($absolutePath);
+		}
+
+		return $settings['pageRelativeUrls'] ?
+			self::pathRelative(dirname($currentDocument), $absoluteUrl) :
+			$absoluteUrl;
+	}
 
 }

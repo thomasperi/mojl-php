@@ -1,6 +1,7 @@
 <?php
 namespace ThomasPeri\Mojl\Test;
 use ThomasPeri\Mojl\Options as Options;
+use ThomasPeri\Mojl\HashCache as HashCache;
 use PHPUnit\Framework\TestCase as TestCase;
 
 final class ExpandOptionsTest extends TestCase {
@@ -55,10 +56,19 @@ final class ExpandOptionsTest extends TestCase {
 		$this->assertTrue($error);
 	}
 
+	function test_addCache() {
+		$actual = Options::expand([
+			'base' => __DIR__ . '/ExpandOptionsTest/foo',
+		]);
+		$this->assertTrue($actual['_cache'] instanceof HashCache);
+		unset($actual['_cache']);
+	}
+
 	function test_expandOptions_base() {
 		$actual = Options::expand([
 			'base' => __DIR__ . '/ExpandOptionsTest/foo',
 		]);
+		unset($actual['_cache']);
 		$expected = array_merge(Options::$defaults, [
 			'base' => __DIR__ . '/ExpandOptionsTest/foo',
 		]);
@@ -70,6 +80,7 @@ final class ExpandOptionsTest extends TestCase {
 			'base' => __DIR__ . '/ExpandOptionsTest/foo',
 			'maxIncludeDepth' => 5,
 		]);
+		unset($actual['_cache']);
 		$expected = array_merge(Options::$defaults, [
 			'base' => __DIR__ . '/ExpandOptionsTest/foo',
 			'maxIncludeDepth' => 5,
@@ -82,6 +93,7 @@ final class ExpandOptionsTest extends TestCase {
 			'base' => __DIR__ . '/ExpandOptionsTest/foo',
 			'isDev' => true,
 		]);
+		unset($actual['_cache']);
 		$expected = array_merge(Options::$defaults, [
 			'base' => __DIR__ . '/ExpandOptionsTest/foo',
 			'isDev' => true,
@@ -94,6 +106,7 @@ final class ExpandOptionsTest extends TestCase {
 			'base' => __DIR__ . '/ExpandOptionsTest/foo',
 			'foo' => 'bar',
 		]);
+		unset($actual['_cache']);
 		$expected = array_merge(Options::$defaults, [
 			'base' => __DIR__ . '/ExpandOptionsTest/foo',
 		]);
