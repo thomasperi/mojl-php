@@ -173,9 +173,71 @@ final class HashCacheTest extends TestCase {
 		});
 	}
 	
-	
+	function test_HashCache_customCacheFileName() {
+		_CloneBox::run(__FILE__, function ($base, $box) {
+			$settings = Options::expand([
+				'base' => $base,
+				'cacheFile' => 'zote-cache.json',
+			]);
+			$cache = new HashCache($settings);
+			$relFile = 'src/foo/foo.txt';
+			$absFile = self::retro($base, $relFile);
 
-	// to-do: complete tests
+			$cache->getFreshEntry($relFile);
+			$cache->saveCache();
+			$after = $box->snapshot();
+			
+			$fileList = array_keys($after);
+			$this->assertEquals($fileList, [
+				'src/foo/foo.txt',
+				'zote-cache.json',
+			]);
+		});
+	}
+
+	function test_HashCache_noEntriesForNonexistentFiles() {
+		_CloneBox::run(__FILE__, function ($base, $box) {
+			$settings = Options::expand([
+				'base' => $base,
+			]);
+			$cache = new HashCache($settings);
+			$relFileFoo = 'src/foo/foo.txt';
+			$relFileBar = 'src/foo/bar.txt'; // not there
+
+			$entryFoo = $cache->getFreshEntry($relFileFoo);
+			$entryBar = $cache->getFreshEntry($relFileBar);
+			
+			$this->assertTrue(!!$entryFoo);
+			$this->assertFalse(!!$entryBar);
+
+			$cache->saveCache();
+			$after = $box->snapshot();
+			
+			$savedCache = json_decode($after['mojl-cache.json']);
+			$savedEntries = $savedCache->entries;
+			$this->assertEquals(array_keys(get_object_vars($savedEntries)), ['src/foo/foo.txt']);
+		});
+	}
+	
+	function test_HashCache_readExistingEntries() {
+		_CloneBox::run(__FILE__, function ($base, $box) {
+			$settings = Options::expand([
+				'base' => $base,
+			]);
+			$relFile = 'src/foo/foo.txt';
+			$absFile = self::retro($base, $relFile);
+
+			// Create cache entry
+			$cache_1 = new HashCache(array_merge($settings, ['cacheSave' => true]));
+			$cache_1->createEntry($relFile);
+			$cache_1->saveCache(); 
+			
+			// Read cache entry
+			$cache_2 = new HashCache($settings);
+			$fresh_2 = $cache_2->readExistingEntry($relFile);
+			$this->assertTrue($cache_2->entryIsFresh($fresh_2));
+		});
+	}
 
 }
 
