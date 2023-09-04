@@ -13,39 +13,46 @@ class TemplateHelper {
 			throw new \Exception('TemplateHelper: `urlDocument` must begin with a slash');
 		}
 		$this->urlDocument = $urlDocument;
-		$this->settings = Options::expand($settings);
+		$this->settings = $settings;
 	}
 	
 	function exists($module) {
-		$_ = $this->settings;
-		return !!getTemplate($_->base, expandModule($_->base, $this->stack, $module));
+		$settings = $this->settings;
+		return !!Util::getTemplate(
+			$settings->base,
+			Util::expandModule($settings->base, $this->stack, $module)
+		);
 	}
 
 	function include($module, $props = []) {
-		$_ = $this->settings;
+		$settings = $this->settings;
+		$stack = &$this->stack;
 		
-		if (count($this->stack) >= $_->maxIncludeDepth) {
-			throw new \Exception('maxIncludeDepth exceeded ' . $_->maxIncludeDepth);
+		if (count($stack) >= $settings->maxIncludeDepth) {
+			throw new \Exception("maxIncludeDepth exceeded ({$settings->maxIncludeDepth})");
 		}
 		
-		$module = expandModule($_->base, $this->stack, $module);
-		$templatePath = getTemplate($_->base, $module);
+		$module = Util::expandModule($settings->base, $stack, $module);
+		$templatePath = Util::getTemplate($settings->base, $module);
 		
 		if (!$templatePath) {
 			throw new \Exception("No template found for module '$module'");
 		}
 		
-		array_push($this->stack, compact('module', 'templatePath'));
-		
-		includeTemplate($templatePath, $this, $props);
-		
-		array_pop($this->stack);
+		array_push($stack, (object) compact('module', 'templatePath'));
+		$result = Util::includeTemplate($templatePath, $this, $props);
+		array_pop($stack);
+
+		if ($settings->trimIncludes) {
+			$result = trim($result);
+		}
+		return $result;
 	}
 	
 	function file($filePath, $options = []) {
 		return Util::fileUrl(
 			$this->settings,
-			end($stack)->templatePath,
+			end($this->stack)->templatePath,
 			$this->urlDocument,
 			$filePath,
 			$options

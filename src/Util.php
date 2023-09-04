@@ -67,7 +67,7 @@ class Util {
 			if (count($stack) === 0) {
 				throw new \Exception('Relative module paths can only be used from inside templates.');
 			}
-			$moduleDir = self::pathResolve($base . '/' . end($stack)['module']);
+			$moduleDir = self::pathResolve($base . '/' . end($stack)->module);
 			$moduleParent = dirname($moduleDir);
 			$absoluteModule = self::pathResolve($moduleParent . '/' . $module);
 			$module = self::pathRelative($base, $absoluteModule);
@@ -93,7 +93,31 @@ class Util {
 		if (!is_callable($fn)) {
 			throw new \Exception("Template $templatePath does not return a function");
 		}
-		$fn($helper, $props);
+		
+		$returned = null;
+		$echoed = null;
+		ob_start();
+		try {
+			$returned = $fn($helper, $props);
+		} finally {
+			$echoed = ob_get_clean();
+		}
+		
+		if ($returned === null) {
+			return $echoed;
+		}
+		if (trim($echoed) === '') {
+			return $returned;
+		}
+		
+	// echo "\n";
+	// var_dump($templatePath);
+	// var_dump($returned);
+	// var_dump($echoed);
+		
+		throw new \Exception(
+			"Template $templatePath had non-empty values for both its output and its return value"
+		);
 	}
 	
 	static function writeFileRecursive($file, $data) {
