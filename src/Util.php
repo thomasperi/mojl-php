@@ -112,12 +112,8 @@ class Util {
 			return $filePath;
 		}
 		
-		if (is_array($settings)) {
-			$settings = (object) $settings;
-		}
-		if (is_array($options)) {
-			$options = (object) $options;
-		}
+		$settings = (object) $settings;
+		$options = (object) $options;
 
 		$isAbsolute = $filePath[0] === '/';
 	
@@ -149,9 +145,7 @@ class Util {
 			return $url;
 		}
 	
-		if (is_array($settings)) {
-			$settings = (object) $settings;
-		}
+		$settings = (object) $settings;
 
 		$isRelative = $url[0] !== '/';
 		$currentDir = dirname($currentPage);
@@ -181,6 +175,9 @@ class Util {
 	}
 
 	static function assetTagAttr($settings, $currentPage, $type, $collationNames, $options) {
+		$settings = (object) $settings;
+		$options = (object) $options;
+		
 		// Use all collations if none specified
 		if ($collationNames === null) {
 			$collationNames = array_map(
@@ -202,7 +199,7 @@ class Util {
 
 		// Convert empty string to current page
 		$collationNames = array_map(
-			function ($collName) use ($settings) {
+			function ($collName) use ($settings, $currentPage) {
 				if ($collName === '') {
 					foreach ($settings->collations as $coll) {
 						if (property_exists($coll, 'page') && $coll->page === $currentPage) {
@@ -226,8 +223,8 @@ class Util {
 
 		// Remove the ones that don't exist
 		return array_filter(
-			fn ($url) => !!$url,
-			$urls
+			$urls,
+			fn ($url) => !!$url
 		);
 	}
 
