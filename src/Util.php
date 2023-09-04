@@ -88,11 +88,8 @@ class Util {
 		return $templatePath;
 	}
 
-	static function includeTemplate($templatePath, $helper, $props) {
-		$fn = require($templatePath);
-		if (!is_callable($fn)) {
-			throw new \Exception("Template $templatePath does not return a function");
-		}
+	static function includeTemplate($templatePath, $props, $helper, $tplCache) {
+		$fn = $tplCache->require($templatePath);
 		
 		$returned = null;
 		$echoed = null;

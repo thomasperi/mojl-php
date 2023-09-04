@@ -1,10 +1,9 @@
 <?php
 namespace ThomasPeri\Mojl;
 
-// to-do: port tests for TemplateHelper specifically 
-
 class TemplateHelper {
 	private $settings;
+	private $tplCache;
 	private $urlDocument;
 	private $stack = [];
 	
@@ -14,6 +13,7 @@ class TemplateHelper {
 		}
 		$this->urlDocument = $urlDocument;
 		$this->settings = $settings;
+		$this->tplCache = new TemplateCache();
 	}
 	
 	function exists($module) {
@@ -40,7 +40,7 @@ class TemplateHelper {
 		}
 		
 		array_push($stack, (object) compact('module', 'templatePath'));
-		$result = Util::includeTemplate($templatePath, $this, $props);
+		$result = Util::includeTemplate($templatePath, $props, $this, $this->tplCache);
 		array_pop($stack);
 
 		if ($settings->trimIncludes) {
