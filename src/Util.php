@@ -252,5 +252,12 @@ class Util {
 		return self::encodeHtmlAttribute($fileUrl);
 	}
 
-	
+	static function scriptTag($settings, $currentPage, $collationNames, $options) {
+		$srcs = self::assetTagAttr($settings, $currentPage, 'js', $collationNames, $options);
+		return implode('', array_map(
+			fn ($src) => "<script src=\"$src\"></script>",
+			$srcs
+		));
+	}
+
 }

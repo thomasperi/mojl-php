@@ -63,10 +63,12 @@ class TemplateHelper {
 	function scripts($collationNames = [], $options = []) {
 		// to-do
 		echo '<!-- scripts -->';
+		// 		return scriptTag(settings, urlDocument, collationNames, options);
 	}
 
 	function styles($collationNames = [], $options = []) {
 		// to-do
 		echo '<!-- styles -->';
+		//		return styleTag(settings, urlDocument, collationNames, options);
 	}
 }
