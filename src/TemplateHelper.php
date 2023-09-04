@@ -24,7 +24,7 @@ class TemplateHelper {
 		);
 	}
 
-	function include($module, $props = []) {
+	function include($module, $props = null) {
 		$settings = $this->settings;
 		$stack = &$this->stack;
 		
