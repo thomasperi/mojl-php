@@ -18,18 +18,18 @@ class TemplateHelper {
 	
 	function exists($module) {
 		$_ = $this->settings;
-		return !!getTemplate($_['base'], expandModule($_['base'], $this->stack, $module));
+		return !!getTemplate($_->base, expandModule($_->base, $this->stack, $module));
 	}
 
 	function include($module, $props = []) {
 		$_ = $this->settings;
 		
-		if (count($this->stack) >= $_['maxIncludeDepth']) {
-			throw new \Exception('maxIncludeDepth exceeded ' . $_['maxIncludeDepth']);
+		if (count($this->stack) >= $_->maxIncludeDepth) {
+			throw new \Exception('maxIncludeDepth exceeded ' . $_->maxIncludeDepth);
 		}
 		
-		$module = expandModule($_['base'], $this->stack, $module);
-		$templatePath = getTemplate($_['base'], $module);
+		$module = expandModule($_->base, $this->stack, $module);
+		$templatePath = getTemplate($_->base, $module);
 		
 		if (!$templatePath) {
 			throw new \Exception("No template found for module '$module'");
