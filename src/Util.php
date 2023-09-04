@@ -172,8 +172,88 @@ class Util {
 		}
 	}
 	
-	static function mergeObjects($o1, $o2) {
-		return (object) array_merge( (array) $o1, (array) $o2 );
+	static function encodeHtmlAttribute($value) {
+		return str_replace(
+			['&', "'", '"', '<', '>'],
+			['&amp;', '&apos;', '&quot;', '&lt;', '&gt;'],
+			$value
+		);
 	}
 
+	static function assetTagAttr($settings, $currentPage, $type, $collationNames, $options) {
+		// Use all collations if none specified
+		if ($collationNames === null) {
+			$collationNames = array_map(
+				fn ($coll) => $coll->name,
+				array_filter(
+					$settings->collations,
+					fn ($coll) => !property_exists($coll, 'page')
+				)
+			);
+			if ($settings->collatePages) {
+				$collationNames[] = ''; // Empty string means current page
+			}
+		}
+
+		// Wrap in array if not already
+		if (!is_array($collationNames)) {
+			$collationNames = [$collationNames];
+		}
+
+		// Convert empty string to current page
+		$collationNames = array_map(
+			function ($collName) use ($settings) {
+				if ($collName === '') {
+					foreach ($settings->collations as $coll) {
+						if (property_exists($coll, 'page') && $coll->page === $currentPage) {
+							$collName = $coll->name;
+							break;
+						}
+					}
+				}
+				return $collName;
+			},
+			$collationNames
+		);
+		
+		// Convert collation names to urls
+		$urls = [];
+		foreach ($collationNames as $collName) {
+			$urls[] = self::assetTagAttrEach(
+				$settings, $currentPage, "$collName.$type", $options
+			);
+		}
+
+		// Remove the ones that don't exist
+		return array_filter(
+			fn ($url) => !!$url,
+			$urls
+		);
+	}
+
+	static function assetTagAttrEach($settings, $currentPage, $file, $options) {
+		$buildDir = $settings->isDev ? $settings->buildDevDir : $settings->buildDistDir;
+		$docroot = $settings->base . '/' . $buildDir;
+		$filePath = self::pathResolve($docroot . '/' . $file);
+
+		if (!file_exists($filePath)) {
+			return;
+		}
+	
+		$fileUrl = '/' . self::pathRelative($docroot, $filePath);
+		if ($settings->pageRelativeUrls) {
+			$fileUrl = self::pathRelative(dirname($currentPage), $fileUrl);
+		}
+	
+		$useHash = ( $options && property_exists($options, 'hash') ) ?
+			$options->hash : true;
+
+		if ($useHash) {
+			$fileUrl .= $settings->_cache->stampAbs($filePath);
+		}
+	
+		return self::encodeHtmlAttribute($fileUrl);
+	}
+
+	
 }
