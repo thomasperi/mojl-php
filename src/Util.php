@@ -260,4 +260,12 @@ class Util {
 		));
 	}
 
+	static function styleTag($settings, $currentPage, $collationNames, $options) {
+		$hrefs = self::assetTagAttr($settings, $currentPage, 'css', $collationNames, $options);
+		return implode('', array_map(
+			fn ($href) => "<link rel=\"stylesheet\" href=\"$href\" />",
+			$hrefs
+		));
+	}
+
 }
