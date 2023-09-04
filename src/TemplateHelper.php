@@ -67,11 +67,11 @@ class TemplateHelper {
 		);
 	}
 	
-	function scripts($collationNames = [], $options = []) {
-		return Util::scriptTag($settings, $urlDocument, $collationNames, $options);
+	function scripts($collationNames = null, $options = null) {
+		return Util::scriptTag($this->settings, $this->urlDocument, $collationNames, $options);
 	}
 
-	function styles($collationNames = [], $options = []) {
-		return Util::styleTag($settings, $urlDocument, $collationNames, $options);
+	function styles($collationNames = null, $options = null) {
+		return Util::styleTag($this->settings, $this->urlDocument, $collationNames, $options);
 	}
 }
