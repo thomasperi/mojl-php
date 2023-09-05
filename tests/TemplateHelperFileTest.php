@@ -21,6 +21,17 @@ final class TemplateHelperFileTest extends TestCase {
 		'trimIncludes' => true,
 	];
 	
+	static function ob($fn) {
+		$result = '';
+		ob_start();
+		try {
+			$fn();
+		} finally {
+			$result = ob_get_clean();
+		}
+		return $result;
+	}
+
 	function test_relativePath() {
 		_CloneBox::run(__FILE__, function ($base, $box) {
 			$settings = (object) array_merge(self::$defaults, [
@@ -28,8 +39,10 @@ final class TemplateHelperFileTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings, '/abc/def/index.html');
-			$actual = $builder->include('src/foo');
+			$tpl = new TemplateHelper($settings, '/abc/def/index.html');
+			$actual = self::ob(fn () =>
+				$tpl->include('src/foo')
+			);
 			$expected = 'foo(/assets/src/foo/icon.gif?h=wyCFiYxuNtNh1LgBcIfekOG4Rlw~)';
 			$this->assertEquals($expected, $actual);
 		});
@@ -42,8 +55,10 @@ final class TemplateHelperFileTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings);
-			$actual = $builder->include('src/foo', ['options' => ['hash' => false]]);
+			$tpl = new TemplateHelper($settings);
+			$actual = self::ob(fn () =>
+				$tpl->include('src/foo', ['options' => ['hash' => false]])
+			);
 			$expected = 'foo(/assets/src/foo/icon.gif)';
 			$this->assertEquals($expected, $actual);
 		});
@@ -57,8 +72,10 @@ final class TemplateHelperFileTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings, '/abc/def/index.html');
-			$actual = $builder->include('src/foo', ['options' => ['hash' => false]]);
+			$tpl = new TemplateHelper($settings, '/abc/def/index.html');
+			$actual = self::ob(fn () =>
+				$tpl->include('src/foo', ['options' => ['hash' => false]])
+			);
 			$expected = 'foo(../../assets/src/foo/icon.gif)';
 			$this->assertEquals($expected, $actual);
 		});
@@ -71,8 +88,10 @@ final class TemplateHelperFileTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings);
-			$actual = $builder->include('src/bar');
+			$tpl = new TemplateHelper($settings);
+			$actual = self::ob(fn () =>
+				$tpl->include('src/bar')
+			);
 			$expected = 'bar(/assets/src/foo/icon.gif?h=wyCFiYxuNtNh1LgBcIfekOG4Rlw~)';
 			$this->assertEquals($expected, $actual);
 		});
@@ -86,8 +105,10 @@ final class TemplateHelperFileTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings, '/abc/def/index.html');
-			$actual = $builder->include('src/bar');
+			$tpl = new TemplateHelper($settings, '/abc/def/index.html');
+			$actual = self::ob(fn () =>
+				$tpl->include('src/bar')
+			);
 			$expected = 'bar(../../assets/src/foo/icon.gif?h=wyCFiYxuNtNh1LgBcIfekOG4Rlw~)';
 			$this->assertEquals($expected, $actual);
 		});
@@ -100,8 +121,10 @@ final class TemplateHelperFileTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings);
-			$actual = $builder->include('src/zote');
+			$tpl = new TemplateHelper($settings);
+			$actual = self::ob(fn () =>
+				$tpl->include('src/zote')
+			);
 			$expected = 'zote(/assets/src/foo/icon.gif?h=wyCFiYxuNtNh1LgBcIfekOG4Rlw~)';
 			$this->assertEquals($expected, $actual);
 		});
@@ -115,8 +138,10 @@ final class TemplateHelperFileTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings, '/abc/def/index.html');
-			$actual = $builder->include('src/zote');
+			$tpl = new TemplateHelper($settings, '/abc/def/index.html');
+			$actual = self::ob(fn () =>
+				$tpl->include('src/zote')
+			);
 			$expected = 'zote(../../assets/src/foo/icon.gif?h=wyCFiYxuNtNh1LgBcIfekOG4Rlw~)';
 			$this->assertEquals($expected, $actual);
 		});

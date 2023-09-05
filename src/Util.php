@@ -99,22 +99,12 @@ class Util {
 		} finally {
 			$echoed = ob_get_clean();
 		}
-		
-		if ($returned === null) {
-			return $echoed;
-		}
-		if (trim($echoed) === '') {
-			return $returned;
+
+		if ($returned !== null) {
+			throw new \Exception("Template $templatePath returned a non-null value");
 		}
 		
-	// echo "\n";
-	// var_dump($templatePath);
-	// var_dump($returned);
-	// var_dump($echoed);
-		
-		throw new \Exception(
-			"Template $templatePath had non-empty values for both its output and its return value"
-		);
+		return $echoed;
 	}
 	
 	static function writeFileRecursive($file, $data) {

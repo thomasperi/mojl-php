@@ -21,6 +21,17 @@ final class TemplateHelperLinkTest extends TestCase {
 		'trimIncludes' => true,
 	];
 	
+	static function ob($fn) {
+		$result = '';
+		ob_start();
+		try {
+			$fn();
+		} finally {
+			$result = ob_get_clean();
+		}
+		return $result;
+	}
+
 	function test_relativeToAbsolute() {
 		_CloneBox::run(__FILE__, function ($base, $box) {
 			$settings = (object) array_merge(self::$defaults, [
@@ -28,8 +39,10 @@ final class TemplateHelperLinkTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings, '/abc/def/index.html');
-			$actual = $builder->include('src/foo', ['theLink' => 'ghi']);
+			$tpl = new TemplateHelper($settings, '/abc/def/index.html');
+			$actual = self::ob(fn () =>
+				$tpl->include('src/foo', ['theLink' => 'ghi'])
+			);
 			$expected = 'foo(/abc/def/ghi)';
 			$this->assertEquals($expected, $actual);
 		});
@@ -43,8 +56,10 @@ final class TemplateHelperLinkTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings, '/abc/def/index.html');
-			$actual = $builder->include('src/foo', ['theLink' => '/abc/ghi']);
+			$tpl = new TemplateHelper($settings, '/abc/def/index.html');
+			$actual = self::ob(fn () =>
+				$tpl->include('src/foo', ['theLink' => '/abc/ghi'])
+			);
 			$expected = 'foo(../ghi)';
 			$this->assertEquals($expected, $actual);
 		});

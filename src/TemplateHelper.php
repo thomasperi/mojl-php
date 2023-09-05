@@ -7,12 +7,13 @@ class TemplateHelper {
 	private $urlDocument;
 	private $stack = [];
 	
-	function __construct($settings = [], $urlDocument = '/index.html') {
+	function __construct($settings, $urlDocument = '/index.html') {
 		if (substr($urlDocument, 0, 1) !== '/') {
 			throw new \Exception('TemplateHelper: `urlDocument` must begin with a slash');
 		}
 		$this->urlDocument = $urlDocument;
 		$this->settings = $settings;
+		$this->settings->_cache = new HashCache($this->settings);
 		$this->tplCache = new TemplateCache();
 	}
 	
@@ -24,7 +25,7 @@ class TemplateHelper {
 		);
 	}
 
-	function include($module, $props = null) {
+	function include($module, $props = null, $test = false) {
 		$settings = $this->settings;
 		$stack = &$this->stack;
 		
@@ -38,15 +39,16 @@ class TemplateHelper {
 		if (!$templatePath) {
 			throw new \Exception("No template found for module '$module'");
 		}
-		
-		array_push($stack, (object) compact('module', 'templatePath'));
-		$result = Util::includeTemplate($templatePath, $props, $this, $this->tplCache);
-		array_pop($stack);
 
+		array_push($stack, (object) compact('module', 'templatePath'));
+		$result = Util::includeTemplate($templatePath, $props, $this, $this->tplCache, $test);
+		array_pop($stack);
+		
 		if ($settings->trimIncludes) {
 			$result = trim($result);
 		}
-		return $result;
+		
+		echo $result;
 	}
 	
 	function file($filePath, $options = []) {

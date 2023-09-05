@@ -21,6 +21,17 @@ final class TemplateHelperIncludeTest extends TestCase {
 		'cacheTTL' => 1 * 24 * 60 * 60 * 1000,
 	];
 	
+	static function ob($fn) {
+		$result = '';
+		ob_start();
+		try {
+			$fn();
+		} finally {
+			$result = ob_get_clean();
+		}
+		return $result;
+	}
+
 	function test_includeTemplate() {
 		_CloneBox::run(__FILE__, function ($base, $box) {
 			$settings = (object) array_merge(self::$defaults, [
@@ -28,8 +39,10 @@ final class TemplateHelperIncludeTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings);
-			$actual = $builder->include('src/foo', ['a' => 1]);
+			$tpl = new TemplateHelper($settings);
+			$actual = self::ob(fn () =>
+				$tpl->include('src/foo', ['a' => 1])
+			);
 			$expected = 'foo(1)';
 			$this->assertEquals($actual, $expected);
 		});
@@ -42,8 +55,10 @@ final class TemplateHelperIncludeTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings);
-			$actual = $builder->include('src/bar', ['a' => 2]);
+			$tpl = new TemplateHelper($settings);
+			$actual = self::ob(fn () =>
+				$tpl->include('src/bar', ['a' => 2])
+			);
 			$expected = 'bar(foo(2))';
 			$this->assertEquals($actual, $expected);
 		});
@@ -56,8 +71,10 @@ final class TemplateHelperIncludeTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings);
-			$actual = $builder->include('src/zote', ['a' => 3]);
+			$tpl = new TemplateHelper($settings);
+			$actual = self::ob(fn () =>
+				$tpl->include('src/zote', ['a' => 3])
+			);
 			$expected = 'zote(foo(3))';
 			$this->assertEquals($actual, $expected);
 		});
@@ -70,8 +87,10 @@ final class TemplateHelperIncludeTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings);
-			$actual = $builder->include('src/sbor', ['a' => 4]);
+			$tpl = new TemplateHelper($settings);
+			$actual = self::ob(fn () =>
+				$tpl->include('src/sbor', ['a' => 4])
+			);
 			$expected = 'sbor(foo(4))';
 			$this->assertEquals($actual, $expected);
 		});
@@ -85,8 +104,10 @@ final class TemplateHelperIncludeTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings);
-			$actual = $builder->include('src/thed', ['a' => 1]);
+			$tpl = new TemplateHelper($settings);
+			$actual = self::ob(fn () =>
+				$tpl->include('src/thed', ['a' => 1])
+			);
 			$expected = 'thed 1 ( thed 2 ( thed 3 ( thed 4 ( thed 5 ( end ) ) ) ) )';
 			$this->assertEquals($expected, $actual);
 		});
@@ -100,10 +121,12 @@ final class TemplateHelperIncludeTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings);
+			$tpl = new TemplateHelper($settings);
 			$actual = null;
 			try {
-				$actual = $builder->include('src/thed', ['a' => 1]);
+				$actual = self::ob(fn () =>
+					$tpl->include('src/thed', ['a' => 1])
+				);
 			} catch (\Exception $e) {
 				$actual = $e;
 			}
@@ -120,8 +143,10 @@ final class TemplateHelperIncludeTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings);
-			$actual = $builder->include('src-trim/foo');
+			$tpl = new TemplateHelper($settings);
+			$actual = self::ob(fn () =>
+				$tpl->include('src-trim/foo')
+			);
 			$expected = 'outer(inner)';
 			$this->assertEquals($expected, $actual);
 		});
@@ -135,8 +160,10 @@ final class TemplateHelperIncludeTest extends TestCase {
 			]);
 			$settings->_cache = new HashCache($settings);
 
-			$builder = new TemplateHelper($settings);
-			$actual = $builder->include('src-trim/foo');
+			$tpl = new TemplateHelper($settings);
+			$actual = self::ob(fn () =>
+				$tpl->include('src-trim/foo')
+			);
 			$expected = ' outer( inner ) ';
 			$this->assertEquals($expected, $actual);
 		});

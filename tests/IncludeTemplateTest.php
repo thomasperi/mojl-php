@@ -31,23 +31,7 @@ final class IncludeTemplateTest extends TestCase {
 		$helper = 123;
 		$props = 456;
 
-		$expected = '123 : 456';
-
-		$actual = Util::includeTemplate($templatePath, $props, $helper, $tplCache);
-
-		$this->assertEquals($expected, $actual);
-	}
-
-	function test_failIfBoth() {
-		$tplCache = new TemplateCache();
-		$templatePath = __DIR__ . '/IncludeTemplateTest/src/zote/zote.tpl.php';
-
-		// includeTemplate just passes the helper and props on to the template,
-		// so they don't need to be real-world values in this test.
-		$helper = 123;
-		$props = 456;
-
-		$expected = "Template $templatePath had non-empty values for both its output and its return value";
+		$expected = "Template $templatePath returned a non-null value";
 
 		try {
 			$actual = Util::includeTemplate($templatePath, $props, $helper, $tplCache);
